@@ -74,7 +74,7 @@ public class ManageList extends Fragment {
                     return;
                 mStringArray.add(String.valueOf(text));
                 adapter.notifyDataSetChanged();
-
+                text.clear();
                 FileOutputStream outputStream;
 
                 try {
@@ -102,7 +102,7 @@ public class ManageList extends Fragment {
                     return;
                 mStringArray.remove(String.valueOf(text));
                 adapter.notifyDataSetChanged();
-
+                text.clear();
                 Context context = ManageList.this.getActivity().getApplicationContext();
                 FileOutputStream outputStream;
 
