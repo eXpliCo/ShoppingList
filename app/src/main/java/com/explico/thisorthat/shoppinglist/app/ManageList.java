@@ -4,37 +4,31 @@ package com.explico.thisorthat.shoppinglist.app;
  * Created by eXpliCo on 2014-05-16.
  */
 
-import android.app.AlertDialog;
+import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ManageList extends Fragment {
+public class ManageList extends Fragment{
     ArrayAdapter<String> adapter;
     ArrayList<String> mStringArray;
     String mFilename = "shoppinglist.txt";
+    MainActivity mMainActivity = null;
+
     public ManageList() {
     }
 
@@ -45,51 +39,18 @@ public class ManageList extends Fragment {
         Context context = this.getActivity().getApplicationContext();
         ListView listView = (ListView) rootView.findViewById(R.id.productsListView);
         mStringArray = new ArrayList<String>();
-        try {
-            FileInputStream fileInputStream = context.openFileInput(mFilename);
-            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String line = "";
 
-            while((line = bufferedReader.readLine()) != null){
-                mStringArray.add(line.substring(1));
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.writeListToFile();
 
         adapter = new ArrayAdapter<String>(context, R.layout.item, this.mStringArray);
-
         listView.setAdapter(adapter);
 
         Button addProductButton = (Button) rootView.findViewById(R.id.addProductButton);
         addProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Context context = ManageList.this.getActivity().getApplicationContext();
-                Editable text = ((EditText) ManageList.this.getView().findViewById(R.id.addProductText)).getText();
-                if(text.toString().trim().length() <= 0)
-                    return;
-                mStringArray.add(String.valueOf(text));
-                adapter.notifyDataSetChanged();
-                text.clear();
-                FileOutputStream outputStream;
+                mMainActivity.showPickProductDialog();
 
-                try {
-                    outputStream = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
-                    OutputStreamWriter outputStreamReader = new OutputStreamWriter(outputStream);
-                    BufferedWriter bufferedWriter = new BufferedWriter(outputStreamReader);
-                    for(String string : mStringArray) {
-                        bufferedWriter.write("0" + string);
-                        bufferedWriter.newLine();
-                    }
-                    bufferedWriter.close();
-                    outputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         });
 
@@ -97,28 +58,7 @@ public class ManageList extends Fragment {
         removeProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Editable text = ((EditText) ManageList.this.getView().findViewById(R.id.addProductText)).getText();
-                if(text.toString().trim().length() <= 0)
-                    return;
-                mStringArray.remove(String.valueOf(text));
-                adapter.notifyDataSetChanged();
-                text.clear();
-                Context context = ManageList.this.getActivity().getApplicationContext();
-                FileOutputStream outputStream;
-
-                try {
-                    outputStream = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
-                    OutputStreamWriter outputStreamReader = new OutputStreamWriter(outputStream);
-                    BufferedWriter bufferedWriter = new BufferedWriter(outputStreamReader);
-                    for(String string : mStringArray) {
-                        bufferedWriter.write("0" + string);
-                        bufferedWriter.newLine();
-                    }
-                    bufferedWriter.close();
-                    outputStream.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                mMainActivity.showRemoveProductDialog();
             }
         });
 
@@ -136,5 +76,46 @@ public class ManageList extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Activity activity){
+        super.onAttach(activity);
+        this.mMainActivity = (MainActivity) activity;
+    }
+
+    public void addProduct(String product){
+        mStringArray.add(String.valueOf(product));
+        adapter.notifyDataSetChanged();
+
+        this.writeListToFile();
+    }
+
+    public void removeProduct(String product){
+        mStringArray.remove(String.valueOf(product));
+        adapter.notifyDataSetChanged();
+
+        this.writeListToFile();
+
+    }
+
+    public void writeListToFile()
+    {
+        Context context = ManageList.this.getActivity().getApplicationContext();
+        FileOutputStream outputStream;
+
+        try {
+            outputStream = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
+            OutputStreamWriter outputStreamReader = new OutputStreamWriter(outputStream);
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamReader);
+            for(String string : mStringArray) {
+                bufferedWriter.write("0" + string);
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.close();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

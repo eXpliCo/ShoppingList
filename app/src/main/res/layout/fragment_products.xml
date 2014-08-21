@@ -12,14 +12,6 @@
         android:id="@+id/productsText"
         android:gravity="center" />
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/addProductText"
-        android:layout_gravity="center_horizontal"
-        android:hint="@string/product_name"
-        android:gravity="center"/>
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
