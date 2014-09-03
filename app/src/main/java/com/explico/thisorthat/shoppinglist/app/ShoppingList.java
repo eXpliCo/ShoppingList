@@ -55,10 +55,12 @@ public class ShoppingList extends Fragment {
             @Override
             public void onClick(View v){
                 int len = mListView.getCount();
+                int offSet = 0;
                 SparseBooleanArray checked = mListView.getCheckedItemPositions();
                 for (int i = 0; i < len; i++) {
                     if (checked.get(i)) {
                         mStringArray.remove(i);
+                        offSet++;
                     }
                 }
                 writeListToFile();
