@@ -47,7 +47,7 @@ public class MainActivity extends ActionBarActivity  implements EnterProductDial
         if (id == R.id.shopping_list) {
             Fragment newFragment = new ShoppingList();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, newFragment)
+                    .replace(R.id.container, newFragment, "ShoppingList")
                     .commit();
         }
         else if (id == R.id.products) {
@@ -64,13 +64,6 @@ public class MainActivity extends ActionBarActivity  implements EnterProductDial
         Log.d(TAG, "ProductDialog - ShowDialog - Add");
         DialogFragment dialog = new EnterProductDialogFragment();
         dialog.show(this.getSupportFragmentManager(), "Add_Product");
-    }
-
-    public void showRemoveProductDialog()
-    {
-        Log.d(TAG, "ProductDialog - ShowDialog - Remove");
-        DialogFragment dialog = new EnterProductDialogFragment();
-        dialog.show(this.getSupportFragmentManager(), "Remove_Product");
     }
 
     @Override

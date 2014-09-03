@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +16,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
@@ -28,6 +34,7 @@ public class ManageList extends Fragment{
     ArrayList<String> mStringArray;
     String mFilename = "shoppinglist.txt";
     MainActivity mMainActivity = null;
+    ListView mListView = null;
 
     public ManageList() {
     }
@@ -37,20 +44,19 @@ public class ManageList extends Fragment{
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_products, container, false);
         Context context = this.getActivity().getApplicationContext();
-        ListView listView = (ListView) rootView.findViewById(R.id.productsListView);
+        mListView = (ListView) rootView.findViewById(R.id.productsListView);
         mStringArray = new ArrayList<String>();
 
-        this.writeListToFile();
+        this.readListFromFile();
 
-        adapter = new ArrayAdapter<String>(context, R.layout.item, this.mStringArray);
-        listView.setAdapter(adapter);
+        adapter = new ArrayAdapter<String>(context, R.layout.item_checkable, this.mStringArray);
+        mListView.setAdapter(adapter);
 
         Button addProductButton = (Button) rootView.findViewById(R.id.addProductButton);
         addProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mMainActivity.showPickProductDialog();
-
             }
         });
 
@@ -58,7 +64,16 @@ public class ManageList extends Fragment{
         removeProductButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mMainActivity.showRemoveProductDialog();
+                int len = mListView.getCount();
+                SparseBooleanArray checked = mListView.getCheckedItemPositions();
+                for (int i = 0; i < len; i++) {
+                    if (checked.get(i)) {
+                        mStringArray.remove(i);
+                    }
+                }
+                writeListToFile();
+                mListView.clearChoices();
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -115,6 +130,23 @@ public class ManageList extends Fragment{
             bufferedWriter.close();
             outputStream.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void readListFromFile() {
+        Context context = this.getActivity().getApplicationContext();
+        try {
+            FileInputStream fileInputStream = context.openFileInput(mFilename);
+            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String line = "";
+
+            while((line = bufferedReader.readLine()) != null){
+                mStringArray.add(line.substring(1));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

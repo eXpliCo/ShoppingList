@@ -55,7 +55,6 @@ public class EnterProductDialogFragment extends DialogFragment {
         builder.setView(view);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-
                     // Send the positive button event back to the host activity
                     mListener.onDialogPositiveClick(EnterProductDialogFragment.this, mEditText);
                 }

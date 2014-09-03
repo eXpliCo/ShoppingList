@@ -7,18 +7,13 @@ package com.explico.thisorthat.shoppinglist.app;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckedTextView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -37,6 +32,7 @@ public class ShoppingList extends Fragment {
     ArrayAdapter<String> adapter;
     ArrayList<String> mStringArray;
     String mFilename = "shoppinglist.txt";
+    ListView mListView = null;
     public ShoppingList() {
     }
 
@@ -44,12 +40,38 @@ public class ShoppingList extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_shopping_list, container, false);
-        Context context = this.getActivity().getApplicationContext();
 
-        ListView listView = (ListView) rootView.findViewById(R.id.shoppingListView);
-
+        mListView = (ListView) rootView.findViewById(R.id.shoppingListView);
+        Button clearCheckedButton = (Button) rootView.findViewById(R.id.buttonClearChecked);
         mStringArray = new ArrayList<String>();
 
+        this.readListFromFile();
+
+        adapter = new ArrayAdapter<String>(this.getActivity().getApplicationContext(), R.layout.item_checkable, this.mStringArray);
+
+        mListView.setAdapter(adapter);
+
+        clearCheckedButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                int len = mListView.getCount();
+                SparseBooleanArray checked = mListView.getCheckedItemPositions();
+                for (int i = 0; i < len; i++) {
+                    if (checked.get(i)) {
+                        mStringArray.remove(i);
+                    }
+                }
+                writeListToFile();
+                mListView.clearChoices();
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        return rootView;
+    }
+
+    private void readListFromFile() {
+        Context context = this.getActivity().getApplicationContext();
         try {
             FileInputStream fileInputStream = context.openFileInput(mFilename);
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
@@ -64,19 +86,25 @@ public class ShoppingList extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        adapter = new ArrayAdapter<String>(this.getActivity().getApplicationContext(), R.layout.item_checkable, this.mStringArray);
+    public void writeListToFile()
+    {
+        Context context = ShoppingList.this.getActivity().getApplicationContext();
+        FileOutputStream outputStream;
 
-        listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                CheckedTextView lView = (CheckedTextView) view;
-                lView.setChecked(!lView.isChecked());
+        try {
+            outputStream = context.openFileOutput(mFilename, Context.MODE_PRIVATE);
+            OutputStreamWriter outputStreamReader = new OutputStreamWriter(outputStream);
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamReader);
+            for(String string : mStringArray) {
+                bufferedWriter.write("0" + string);
+                bufferedWriter.newLine();
             }
-        });
-
-        return rootView;
+            bufferedWriter.close();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

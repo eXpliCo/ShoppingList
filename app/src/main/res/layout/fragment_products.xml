@@ -46,6 +46,7 @@
         android:layout_height="wrap_content"
         android:inputType="textMultiLine"
         android:ems="10"
-        android:id="@+id/productsListView" />
+        android:id="@+id/productsListView"
+        android:choiceMode="multipleChoice" />
 
 </LinearLayout>
