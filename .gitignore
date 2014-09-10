@@ -1,4 +1,4 @@
-# Created by http://www.gitignore.io
+# Created by https://www.gitignore.io
 
 ### Android ###
 # Built application files
@@ -27,9 +27,3 @@ proguard/
 
 # Log Files
 *.log
-
-
-.gradle
-/local.properties
-/.idea/workspace.xml
-.DS_Store
